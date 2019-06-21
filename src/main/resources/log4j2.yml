@@ -1,0 +1,22 @@
+Configuration:
+  status: warn
+
+  Appenders:
+    Console:
+      name: CONSOLE
+      target: SYSTEM_OUT
+      PatternLayout:
+        # this is going to be stupid close to the default formatting for Spring
+        Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p %5T --- [%15.15t] %-40c{1.} : %m%n"
+
+  Loggers:
+    Root:
+      level: info
+      AppenderRef:
+        - ref: CONSOLE
+    Logger:
+      - name: com.github.brainlag
+        additivity: false
+        level: debug
+        AppenderRef:
+        - ref: CONSOLE

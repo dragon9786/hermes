@@ -1,0 +1,6 @@
+.gradle
+.idea
+build
+out
+src/main/generated-sources/
+src/test/generated-test-sources/

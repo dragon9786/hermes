@@ -1,0 +1,148 @@
+buildscript {
+    repositories {
+        maven { url 'https://plugins.gradle.org/m2/' }
+        maven { url 'http://repo.spring.io/plugins-release' }
+    }
+    dependencies {
+        classpath 'io.spring.gradle:propdeps-plugin:0.0.9.RELEASE'
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.4.7.RELEASE'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.15.0'
+    }
+}
+
+plugins {
+    id 'java'
+    id 'idea'
+    id 'org.springframework.boot' version '1.4.7.RELEASE'
+    id 'com.github.ben-manes.versions' version '0.15.0'
+}
+
+group 'com.usebutton.services'
+version ''
+
+// properties which will be used in various places here
+ext {
+    springGroup = 'org.springframework.boot'
+    springVersion = '1.4.7.RELEASE'
+    hbaseVersion = '1.3.1'
+    geoMesaVersion = '1.3.4'
+    geoToolsVersion = '15.1'
+}
+
+configurations.all {
+    exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+}
+
+configure(allprojects) {
+    apply plugin: 'propdeps'
+    apply plugin: 'propdeps-maven'
+    apply plugin: 'propdeps-idea'
+    apply plugin: 'propdeps-eclipse'
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    flatDir name: "localLibs", dirs: "$projectDir/libs"
+    maven { url 'http://download.osgeo.org/webdav/geotools' }
+    mavenCentral()
+    maven { url 'http://download.osgeo.org/webdav/geotools' }
+    maven { url 'https://repo.locationtech.org/content/repositories/releases' }
+    maven { url 'https://repo.locationtech.org/content/repositories/snapshots' }
+    maven { url 'http://maven.geo-solutions.it' }
+    maven { url 'http://conjars.org/repo' }
+}
+
+dependencies {
+    compile group: 'javax.media', name: 'jai_core', version: '1.1.3'
+
+    // spring base
+    compile group: "${springGroup}", name: 'spring-boot-starter-web', version: "${springVersion}"
+    compile group: "${springGroup}", name: 'spring-boot-starter-actuator', version: "${springVersion}"
+    compile group: "${springGroup}", name: 'spring-boot-starter-tomcat', version: "${springVersion}"
+
+    // prometheus client
+    compile group: 'io.prometheus', name: 'simpleclient_spring_boot', version: '0.0.18'
+
+    // consul client
+    compile group: 'com.orbitz.consul', name: 'consul-client', version: '0.12.6'
+
+    compile group: 'org.jetbrains', name: 'annotations', version: '15.0'
+
+    // immutable serialization
+    compile group: 'org.immutables', name: 'value', version: '2.5.5'
+    compile group: 'org.immutables', name: 'builder', version: '2.5.5'
+
+    // msgpack serialization for jackson
+    compile group: 'org.msgpack', name: 'jackson-dataformat-msgpack', version: '0.8.13'
+
+    // properties processor
+    optional group: "${springGroup}", name: 'spring-boot-configuration-processor', version: "${springVersion}"
+
+    // netty (for nsq)
+    compile group: 'io.netty', name: 'netty-all', version: '4.0.39.Final'
+
+    // redis comms
+    compile group: 'org.springframework.data', name: 'spring-data-redis', version: '1.8.4.RELEASE'
+    compile group: 'redis.clients', name: 'jedis', version: '2.9.0'
+
+    // include log4j2 stuffs
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.8.2'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.8.2'
+    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.7.3'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.9'
+
+    // GeoMesa and Geotools dependencies
+    compile group: 'org.geotools', name: 'gt-wfs', version: "${geoToolsVersion}"
+    compile group: 'org.geotools', name: 'gt-epsg-wkt', version: "${geoToolsVersion}"
+    compile group: 'org.geotools', name: 'gt-epsg-hsql', version: "${geoToolsVersion}"
+    compile group: 'org.geotools', name: 'gt-opengis', version: "${geoToolsVersion}"
+    compile group: 'org.geotools', name: 'gt-data', version: "${geoToolsVersion}"
+    compile group: 'org.geotools', name: 'gt-main', version: "${geoToolsVersion}"
+    compile group: 'org.apache.hbase', name: 'hbase', version: "${hbaseVersion}"
+    compile group: 'org.apache.hbase', name: 'hbase-client', version: "${hbaseVersion}"
+    compile group: 'org.apache.hbase', name: 'hbase-server', version: "${hbaseVersion}"
+    compile group: 'org.locationtech.geomesa', name:'geomesa-hbase-datastore_2.11', version: "${geoMesaVersion}"
+    compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
+
+    // lombok for concise annotations
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.18'
+
+    // base test stuff
+    testCompile group: "${springGroup}", name: 'spring-boot-starter-test', version: "${springVersion}"
+    testCompile group: 'com.jayway.restassured', name: 'rest-assured', version: '2.9.0'
+    testCompile group: 'com.jayway.restassured', name: 'json-schema-validator', version: '2.9.0'
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile group: 'org.hsqldb', name: 'hsqldb', version: '2.4.0'
+}
+
+test {
+    testLogging {
+        // Make sure output from standard out or error is shown in Gradle output.
+	    //
+	    //showStandardStreams = true
+    }
+}
+
+compileJava.dependsOn(processResources)
+
+compileJava {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-Xlint:unchecked'
+    options.compilerArgs << '-Xdiags:verbose'
+}
+
+compileTestJava {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-Xlint:unchecked'
+    options.compilerArgs << '-Xdiags:verbose'
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.1'
+}
+
+bootRun {
+    systemProperties['spring.profiles.active']=project.gradle.startParameter.systemPropertiesArgs['spring.profiles.active']
+}

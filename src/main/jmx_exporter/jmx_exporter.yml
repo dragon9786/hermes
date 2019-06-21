@@ -1,0 +1,11 @@
+---
+lowercaseOutputName: false
+lowercaseOutputLabelNames: false
+rules:
+  - pattern: "^(.+)"
+    name: hermes_$1
+    valueFactor: 0.001
+    labels: {}
+    help: "Cassandra metric $1"
+    type: GAUGE
+    attrNameSnakeCase: false

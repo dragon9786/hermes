@@ -1,0 +1,53 @@
+server:
+  port: 9192
+  hostIP: 127.0.0.1
+
+consul:
+  host: 127.0.0.1
+  port: 8500
+
+logging:
+  level:
+    org: WARN
+    com:
+      usebutton: INFO
+
+cache:
+  hostName: 127.0.0.1
+  port: 6379
+  defaultExpirationSeconds: 300
+  expirationOffsetSeconds: 60
+  useCluster: no
+
+
+hbase:
+  tableName: buttonLocation
+
+web:
+  letCatalinaCache: false
+  maxKeepAliveRequests: 100000
+
+---
+spring:
+  profiles: docker
+
+server:
+  hostIP: hermes
+
+consul:
+  host: consul
+
+cache:
+  hostName: redis
+
+nsq:
+  lookupAddresses:
+    - nsqlookupd:4161
+  publishAddress: nsqd:4150
+
+---
+spring:
+  profiles: ideToLocalDocker
+
+nsq:
+  environment: ideToLocalDocker
